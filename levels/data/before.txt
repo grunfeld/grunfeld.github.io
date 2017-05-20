@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+    <link rel="stylesheet" type="text/css" href="../css/sweetalert.css">
+    <link rel="stylesheet" type="text/css" href="../css/game.css">
+    <title>C.A.S.E.O.</title>
+  </head>
+<body>
+<div class="center-align-container">
+    <canvas id="myCanvas" class="myCanvas"></canvas>
+</div>
+<div class="center-align-container" style="font-size:1.4em;margin-top:0;padding-top:0">
+    <a href="../menu.html" style="color:white">Levels</a>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <a id="LOCK_BTN" style="color:white;cursor:default">Toggle-Lock</a>
+    <span>&nbsp;&nbsp;&nbsp;</span>
+    <a id="UNDO_BTN" style="color:white;cursor:default">Undo</a>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <a onclick="ReloadPage()" style="color:#DB7093;cursor:default">Restart</a>
+</div>
+
+<script src="../js/jquery-3.2.1.min.js"></script>
+<script src="../js/sweetalert.min.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/board.js"></script>
+<script>
+$(document).ready(function() {

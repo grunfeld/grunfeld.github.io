@@ -1,0 +1,28 @@
+@font-face {
+  font-family: 'Kalam';
+  font-weight: 400;
+  font-style: normal;
+  src: url('/fonts/Kalam-regular/Kalam-regular.eot');
+  src: url('/fonts/Kalam-regular/Kalam-regular.eot?#iefix') format('embedded-opentype'),
+       local('Kalam'),
+       local('Kalam-regular'),
+       url('/fonts/Kalam-regular/Kalam-regular.woff2') format('woff2'),
+       url('/fonts/Kalam-regular/Kalam-regular.woff') format('woff'),
+       url('/fonts/Kalam-regular/Kalam-regular.ttf') format('truetype'),
+       url('/fonts/Kalam-regular/Kalam-regular.svg#Kalam') format('svg');
+}
+
+@font-face {
+  font-family: 'Kalam';
+  font-weight: 700;
+  font-style: normal;
+  src: url('/fonts/Kalam-700/Kalam-700.eot');
+  src: url('/fonts/Kalam-700/Kalam-700.eot?#iefix') format('embedded-opentype'),
+       local('Kalam Bold'),
+       local('Kalam-700'),
+       url('/fonts/Kalam-700/Kalam-700.woff2') format('woff2'),
+       url('/fonts/Kalam-700/Kalam-700.woff') format('woff'),
+       url('/fonts/Kalam-700/Kalam-700.ttf') format('truetype'),
+       url('/fonts/Kalam-700/Kalam-700.svg#Kalam') format('svg');
+}
+

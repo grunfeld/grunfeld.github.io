@@ -1,0 +1,30 @@
+body {
+    font-family : "Kalam", sans-serif;
+    font-weight : normal;
+    font-style  : normal;
+    font-size   : 20px;
+    background-color: black;
+    color: white;
+}
+
+.mono {
+    font-family : "Roboto Mono", monospace;
+    font-weight : normal;
+    font-style  : normal;
+}
+
+.center-align-container {
+   width      : 100%;
+   text-align : center;
+}
+
+.myCanvas {
+   display    : inline;
+   border     : 0;
+   margin-top : 10px;
+}
+
+a:link, a:visited, a:hover, a:active {
+    text-decoration: none;
+}
+

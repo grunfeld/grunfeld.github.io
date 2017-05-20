@@ -1,0 +1,1 @@
+ byzanz-record --duration=10 --x=240 --y=150 -c --delay=8 --width=350 --height=350 demo.gif -v

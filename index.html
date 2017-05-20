@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="css/fonts.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="css/menu.css">
+    <title>C.A.S.E.O. - Intro</title>
+    <style>
+        .spacer20 { height: 20px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
+        .spacer50 { height: 50px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
+        .table-borderless > tbody > tr > td,
+        .table-borderless > tbody > tr > th,
+        .table-borderless > tfoot > tr > td,
+        .table-borderless > tfoot > tr > th,
+        .table-borderless > thead > tr > td,
+        .table-borderless > thead > tr > th {
+            border: none;
+        }
+        .table td a { color: lightblue; }
+        .table tr th { font-size: 1.4em; }
+        a { outline: 0; }
+    </style>
+  </head>
+<body class="text-white" style="background-color:black">
+<div class="container-fluid">
+    <div class="row" style="height:100vh;">
+        <div class="col-sm-12 col-md-6 offset-md-3">
+            <div class="spacer50"></div>
+            <div class="text-center">
+                <h1 style="font-size:4em">C.A.S.E.O.</h1>
+                <p>Cross All Squares Exactly Once</p>
+                <div class="spacer20"></div>
+                <h3>An open source clone of Alcazar</h3>
+            </div>
+            <div class="spacer50"></div>
+            <table class="table table-sm table-borderless">
+                <tbody>
+                    <tr>
+                        <td><a href="#HELP"><i class="fa fa-question-circle-o fa-5x" aria-hidden="true"></i></a></td>
+                        <td><a href="menu.html"><i class="fa fa-gamepad fa-5x" aria-hidden="true"></i></a></td>
+                        <td><a href="#"><i class="fa fa-github fa-5x" aria-hidden="true"></i></a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="HELP" class="row">
+        <div class="col-sm-12 col-md-6 offset-md-3">
+            <img src="img/demo.gif" class="img-fluid mx-auto d-block" alt="demo">
+            <div class="spacer50"></div>
+            
+            <h2>Objective</h2>
+            <div class="spacer20"></div>
+            <h3>Enter the room from one of the doors on the border and exit from another.</h3>
+            <h3>Cross every square inside the room exactly once.</h3>
+            <div class="spacer50"></div>
+            <h2>Game Mechanics</h2>
+            <div class="spacer20"></div>
+            <h3><i class="fa fa-mouse-pointer" aria-hidden="true"></i> = <i class="fa fa-paint-brush" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;Use mouse as a brush to draw path between the squares.</h3>
+            <div class="spacer20"></div>
+            <h3><i class="fa fa-eraser" aria-hidden="true"></i> &nbsp;&nbsp;&nbsp;Re-brushing a drawn path/segment erases it.</h3>
+            <div class="spacer20"></div>
+            <h3><i class="fa fa-bookmark" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;Use [Toggle-Lock] to save the progress.</h3>
+            <div class="spacer20"></div>
+            <h3><i class="fa fa-undo" aria-hidden="true"></i> <i class="fa fa-long-arrow-right" aria-hidden="true"></i> <i class="fa fa-bookmark" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;[Undo] erases all the paths drawn after the save point.</h3>
+        </div>
+    </div>
+</div>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script>
+    $(".table th").addClass("text-center");
+    $(".table td").addClass("text-center");
+
+    $(document).on('click', 'a[href^="#"]', function(e) {
+        var id = $(this).attr('href');
+        var $id = $(id);
+        if ($id.length === 0) {
+            return;
+        }
+        e.preventDefault();
+        var pos = $id.offset().top;
+        $('body, html').animate({scrollTop: pos}, 700);
+    });
+
+</script>
+</body>
+</html>
+
+
