@@ -543,8 +543,6 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
             }
         }
 
-
-
         if (num_of_4 != 2) { // single entry and exit
             return false;
         } else {

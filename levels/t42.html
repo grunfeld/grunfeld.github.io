@@ -81,6 +81,7 @@ $(document).ready(function() {
         _ctx.beginPath();
         _drawing = true;
         _lastPos = getMousePos(canvas, e);
+        _ctx.lineJoin = _ctx.lineCap = 'round';
     }, false);
     canvas.addEventListener("mouseup", function (e) {
         if (_drawing) {
