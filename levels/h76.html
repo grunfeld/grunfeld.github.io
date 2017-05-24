@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+    <link rel="stylesheet" type="text/css" href="../css/sweetalert.css">
+    <link rel="stylesheet" type="text/css" href="../css/game.css">
+    <title>C.A.S.E.O.</title>
+  </head>
+<body>
+<div class="center-align-container">
+    <canvas id="myCanvas" class="myCanvas"></canvas>
+</div>
+<div class="center-align-container" style="font-size:1.4em;margin-top:0;padding-top:0">
+    <a href="../menu.html" style="color:white">Levels</a>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <a id="LOCK_BTN" style="color:white;cursor:default">Toggle-Lock</a>
+    <span>&nbsp;&nbsp;&nbsp;</span>
+    <a id="UNDO_BTN" style="color:white;cursor:default">Undo</a>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <a onclick="ReloadPage()" style="color:#DB7093;cursor:default">Restart</a>
+</div>
+
+<script src="../js/jquery-3.2.1.min.js"></script>
+<script src="../js/sweetalert.min.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/board.js"></script>
+<script>
+$(document).ready(function() {
+    let R = 8;
+    let C = 8;
+    let row_data = [[0, 2, 0, 0, 2, 0, 2, 0], [1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 0, 1, 1, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1], [0, 2, 0, 2, 0, 0, 0, 0]];
+    let col_data = [[0, 1, 1, 1, 1, 1, 1, 1, 0], [0, 1, 1, 1, 0, 1, 1, 1, 2], [2, 1, 1, 1, 0, 1, 1, 1, 2], [0, 1, 1, 1, 1, 1, 1, 1, 0], [2, 1, 0, 1, 1, 1, 0, 1, 0], [0, 1, 0, 1, 1, 0, 1, 1, 0], [2, 1, 1, 1, 0, 1, 0, 1, 0], [0, 1, 1, 1, 1, 1, 1, 1, 0]];
+    let win_h    = $(window).height();
+    let win_w    = $(window).width();
+    let FONT     = "Courier, monospace";
+    let fh       = 2;
+    let font_dim = MeasureText("A", true, FONT, fh);
+    let char_h   = font_dim[1];
+    let char_w   = font_dim[0];
+    let req_h    = R * 5 * char_h + (R+1) * char_h + 80;
+    let req_w    = C * 11 * char_w + (C+1) * char_w + 80;
+    while (req_h < win_h && req_w < win_w) {
+        ++fh;
+        font_dim = MeasureText("A", true, FONT, fh);
+        char_h   = font_dim[1];
+        char_w   = font_dim[0];
+        req_h    = R * 5 * char_h + (R+1) * char_h + 80;
+        req_w    = C * 11 * char_w + (C+1) * char_w + 80;
+    }
+
+    var _b = new board(R, C, "myCanvas", FONT, fh-1);
+    _b.Draw(row_data, col_data);
+    function getMousePos(canvas, evt) {
+        let rect = canvas.getBoundingClientRect();
+        return {
+            x: (evt.clientX-rect.left) / (rect.right-rect.left) * canvas.width,
+            y: (evt.clientY-rect.top)  / (rect.bottom-rect.top) * canvas.height
+        };
+    }
+
+    var canvas       = document.getElementById("myCanvas");
+    var _ctx         = canvas.getContext("2d");
+    _ctx.strokeStyle = "#E6E6FA";
+    _ctx.lineWidth   = Math.floor(fh*1.33);
+    var _drawing     = false;
+    var _mousePos    = { x : -1, y : -1 };
+    var _lastPos     = _mousePos;
+    canvas.addEventListener("mousedown", function (e) {
+        _ctx.beginPath();
+        _drawing = true;
+        _lastPos = getMousePos(canvas, e);
+        _ctx.lineJoin = _ctx.lineCap = 'round';
+    }, false);
+    canvas.addEventListener("mouseup", function (e) {
+        if (_drawing) {
+            _ctx.closePath();
+            _mousePos = getMousePos(canvas, e);
+            _b.Clicked(_mousePos.x, _mousePos.y);
+            _lastPos = _mousePos;
+            _drawing = false;
+        }
+    }, false);
+    canvas.addEventListener("mousemove", function (e) {
+        _mousePos = getMousePos(canvas, e);
+    }, false);
+    canvas.addEventListener("mouseout", function (e) {
+        var mouseEvent = new MouseEvent("mouseup", {});
+        canvas.dispatchEvent(mouseEvent);
+    }, false);
+
+    function renderCanvas() {
+        if (_drawing) {
+            if (_lastPos.x > 0 && _lastPos.y > 0 &&
+                _mousePos.x > 0 && _mousePos.y > 0) {
+                _ctx.moveTo(_lastPos.x, _lastPos.y);
+                _ctx.lineTo(_mousePos.x, _mousePos.y);
+                _ctx.stroke();
+            }
+            _lastPos = _mousePos;
+            _b.LogDragClick(_mousePos.x, _mousePos.y);
+        }
+    }
+    (function drawLoop () {
+        requestAnimFrame(drawLoop);
+        renderCanvas();
+    })();
+
+    // TOUCH EVENTS
+    // Prevent scrolling when touching the canvas
+    canvas.addEventListener("touchstart", function (e) {
+        e.preventDefault();
+        var touch = e.touches[0];
+        var mouseEvent = new MouseEvent("mousedown", {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+    }, false);
+
+    canvas.addEventListener("touchend", function (e) {
+        var mouseEvent = new MouseEvent("mouseup", {});
+        canvas.dispatchEvent(mouseEvent);
+    }, false);
+
+    canvas.addEventListener("touchmove", function (e) {
+        e.preventDefault();
+        var touch = e.touches[0];
+        var mouseEvent = new MouseEvent("mousemove", {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+    }, false);
+
+    $("#LOCK_BTN").click(function() {
+        _b.ToggleLock();
+    });
+
+    $("#UNDO_BTN").click(function() {
+        _b.RestoreLockedState();
+    });
+});
+</script>
+
+</body>
+</html>
