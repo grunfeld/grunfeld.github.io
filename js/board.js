@@ -203,13 +203,13 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                         if (this.res[i][j] == 2)
                             this.ctx.fillStyle="rgba(94, 93, 155, 0.35)";
                         else
-                            this.ctx.fillStyle="rgba(94, 93, 87, 0.3)";
+                            this.ctx.fillStyle="rgba(104, 103, 97, 0.3)";
                     }
                     else {
                         if (this.res[i][j] == 2)
                             this.ctx.fillStyle="rgba(130, 126, 155, 0.45)";
                         else
-                            this.ctx.fillStyle="rgba(130, 126, 110, 0.4)";
+                            this.ctx.fillStyle="rgba(150, 146, 130, 0.4)";
                     }
                     this.ctx.fillRect(rect_x, rect_y, rect_width, rect_height);
                     rect_x += (rect_width + ctx_char_width /*this.font_dim[0]*/);
@@ -262,7 +262,10 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
             } else if (text[i] == this.HORI_SEP_CHAR || text[i] == this.VERT_SEP_CHAR) {
                 wall_chars += " ";
                 path_chars += " ";
-                dots_chars += text[i];
+                if (i % 2 === 0)
+                    dots_chars += text[i];
+                else
+                    dots_chars += " ";
             } else if (text[i] == this.PATH_CHAR) {
                 wall_chars += " ";
                 path_chars += this.PATH_CHAR;
@@ -274,7 +277,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
             }
         }
         let x = this.X_OFFSET;
-        this.ctx.fillStyle  = "rgba(120, 120, 120, 0.5)";
+        this.ctx.fillStyle  = "rgba(150, 150, 150, 0.5)";
         this.ctx.fillText(dots_chars, x, y);
         this.ctx.fillStyle  = "rgba(220, 220, 220, 1)";
         this.ctx.fillText(wall_chars, x, y);
