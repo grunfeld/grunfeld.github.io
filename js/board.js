@@ -574,7 +574,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
 
         let path = window.location.pathname;
         let lvl = path.split("/").pop().split(".")[0];
-        Cookies.set("#" + lvl, "1");
+        Cookies.set("#" + lvl, "1", {expires: 1000});
         return true;
     };
 
