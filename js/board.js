@@ -21,7 +21,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
     this.FONT          = FONT;
     this.FONT_SIZE     = font_size;
     this.WALL_CHAR     = "/";
-    this.PATH_CHAR     = "#"; //"\u25FC"; Windows doesn't like unicode
+    this.PATH_CHAR     = "O"; //"\u25FC"; Windows doesn't like unicode
     this.LOCKED_P_CHAR = "X";
     this.VERT_SEP_CHAR = ".";
     this.HORI_SEP_CHAR = ".";
