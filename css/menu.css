@@ -4,3 +4,6 @@ body {
     font-style: normal;
     font-size: 20px;
 }
+.level-completed {
+    text-decoration: line-through;
+}
