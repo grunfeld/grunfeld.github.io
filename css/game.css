@@ -3,9 +3,8 @@ body {
     font-weight : normal;
     font-style  : normal;
     font-size   : 20px;
-    background-color: black;
-    background: linear-gradient(to bottom right, #000000, #333333);
-    background-repeat:no-repeat;
+    background-color: #1D1D1D;
+    /*background: linear-gradient(to bottom right, #000000, #333333);*/
     background-size:100% 100%;
     color: white;
 }
