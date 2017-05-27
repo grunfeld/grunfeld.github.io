@@ -78,10 +78,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
     this.ctx              = this.canvas.getContext("2d");
     this.ctx.font         = "bold " + this.FONT_SIZE + "pt " + this.FONT;
     this.ctx.textBaseline = "hanging";
-    //this.ctx.shadowBlur   = 10;      // shadows slow things down
-    //this.ctx.shadowColor  = "brown";
     this.ctx.fillStyle    = "black";
-    //this.ctx.setLineDash([1, 16]);
 
     this.Draw = function(row_data, col_data, update_state = true) {
 
@@ -249,6 +246,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
         let dots_chars = "";
         let lock_chars = "";
 
+        let wall_chars_present = 0;
         let path_chars_present = 0;
         let lock_chars_present = 0;
         for (let i = 0; i < text.length; ++i) {
@@ -260,13 +258,14 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                 dots_chars += " ";
             } else if (text[i] == this.WALL_CHAR) {
                 wall_chars += this.WALL_CHAR;
+                wall_chars_present = 1;
                 path_chars += " ";
                 dots_chars += " ";
                 lock_chars += " ";
             } else if (text[i] == this.HORI_SEP_CHAR || text[i] == this.VERT_SEP_CHAR) {
                 wall_chars += " ";
                 path_chars += " ";
-                if (i % 2 === 0)  // Reduces horizontal . frequency by half
+                if (i % 2 === 0)  // Reduces horizontal dot frequency by half
                     dots_chars += text[i];
                 else
                     dots_chars += " ";
@@ -290,7 +289,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
         this.ctx.fillStyle  = "rgba(220, 220, 220, 1)";
         this.ctx.fillText(wall_chars, x, y);
 
-        if (1) { // DRAW BORDERS AROUND WALLS (OPTIONAL, CAN BE TURNED OFF WITHOUT ANY SIDE EFFECTS)
+        if (wall_chars_present) { // DRAW BORDERS AROUND WALLS (OPTIONAL, CAN BE TURNED OFF WITHOUT ANY SIDE EFFECTS)
             this.ctx.save();
             this.ctx.shadowColor   = "rgba(150, 150, 150, 1)";
             this.ctx.shadowOffsetX = 3;
@@ -425,7 +424,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                 else
                     mod_lock_chars += lock_chars.charAt(i);
             }
-            this.ctx.fillStyle = "rgba(100,149,237, 1)";
+            this.ctx.fillStyle = "rgba(100, 149, 237, 1)";
             this.ctx.fillText(mod_lock_chars, x, y);
 
             let path_segments = [];
@@ -485,7 +484,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                 let mid_x = j * hori_segment_len + hori_segment_len / 2 + this.X_OFFSET;
                 let mid_y = i * vert_segment_len + this.Y_OFFSET;
                 this.row_midpoints[i][j] = {x: mid_x, y: mid_y};
-                /* 
+                /* // DEBUG - to visualize where the hotspots are 
                 this.ctx.beginPath();
                 this.ctx.arc(mid_x, mid_y, 5, 0,2*Math.PI);
                 this.ctx.stroke();
@@ -499,7 +498,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                 let mid_x = j * hori_segment_len + this.X_OFFSET;
                 let mid_y = i * vert_segment_len + vert_segment_len / 2 + this.Y_OFFSET;
                 this.col_midpoints[i][j] = {x: mid_x, y: mid_y};
-                /*
+                /* // DEBUG - to visualize where the hotspots are
                 this.ctx.beginPath();
                 this.ctx.arc(mid_x, mid_y, 5, 0,2*Math.PI);
                 this.ctx.stroke();
@@ -911,7 +910,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
             ++n;
             next_lvl_link = this.lvl[0] + n.toString();
         }
-        return "<a href='" + next_lvl_link + ".html'>Next level</a>";
+        return "<a href='" + next_lvl_link + ".html'>Next Level</a>";
     };
 };
 
