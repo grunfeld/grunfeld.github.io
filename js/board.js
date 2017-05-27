@@ -910,7 +910,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
             ++n;
             next_lvl_link = this.lvl[0] + n.toString();
         }
-        return "<a href='" + next_lvl_link + ".html'>Next Level</a>";
+        return "<h1><a href='" + next_lvl_link + ".html'>Next Level</a></h1>";
     };
 };
 
