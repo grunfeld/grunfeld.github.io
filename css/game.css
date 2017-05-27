@@ -4,7 +4,9 @@ body {
     font-style  : normal;
     font-size   : 20px;
     background-color: black;
-    background: linear-gradient(to bottom right, black, #333333);
+    background: linear-gradient(to bottom right, #000000, #333333);
+    background-repeat:no-repeat;
+    background-size:100% 100%;
     color: white;
 }
 
