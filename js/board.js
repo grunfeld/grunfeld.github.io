@@ -223,7 +223,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                 for (let j = 0; j < this.image_cols; ++j)
                     text += this.image[i][j];
                 //this.ctx.fillText(text, this.X_OFFSET, this.font_dim[1]*i + this.Y_OFFSET);
-                this.ConvertTextToDrawing(text, this.font_dim[1]*i + this.Y_OFFSET);
+                this.ConvertTextToDrawing(i, text, this.font_dim[1]*i + this.Y_OFFSET);
                 //console.log(text.length);
                 //console.log(this.ctx.measureText(text).width);
             }
@@ -248,32 +248,47 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
         }
     };
 
-    this.ConvertTextToDrawing = function(text, y) { // TODO - Work in progress
+    this.ConvertTextToDrawing = function(r, text, y) {
         // Character by character printing is way tool slow.
         // split the text into various components and then print
         let wall_chars = "";
         let path_chars = "";
         let dots_chars = "";
+        let lock_chars = "";
+
+        let path_chars_present = 0;
+        let lock_chars_present = 0;
         for (let i = 0; i < text.length; ++i) {
-            if (text[i] == this.WALL_CHAR || text[i] == this.LOCKED_P_CHAR) {
-                wall_chars += text[i];
+            if (text[i] == this.LOCKED_P_CHAR) {
+                lock_chars += this.LOCKED_P_CHAR;
+                lock_chars_present = 1;
+                wall_chars += " ";
                 path_chars += " ";
                 dots_chars += " ";
+            } else if (text[i] == this.WALL_CHAR) {
+                wall_chars += this.WALL_CHAR;
+                path_chars += " ";
+                dots_chars += " ";
+                lock_chars += " ";
             } else if (text[i] == this.HORI_SEP_CHAR || text[i] == this.VERT_SEP_CHAR) {
                 wall_chars += " ";
                 path_chars += " ";
-                if (i % 2 === 0)
+                if (i % 2 === 0)  // Reduces horizontal . frequency by half
                     dots_chars += text[i];
                 else
                     dots_chars += " ";
+                lock_chars += " ";
             } else if (text[i] == this.PATH_CHAR) {
                 wall_chars += " ";
                 path_chars += this.PATH_CHAR;
+                path_chars_present = 1;
                 dots_chars += " ";
+                lock_chars += " ";
             } else {
                 wall_chars += text[i];
                 path_chars += text[i];
                 dots_chars += text[i];
+                lock_chars += text[i];
             }
         }
         let x = this.X_OFFSET;
@@ -281,8 +296,186 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
         this.ctx.fillText(dots_chars, x, y);
         this.ctx.fillStyle  = "rgba(220, 220, 220, 1)";
         this.ctx.fillText(wall_chars, x, y);
-        this.ctx.fillStyle = "rgba(0, 255, 0, 1)";
-        this.ctx.fillText(path_chars, x, y);
+
+        if (1) { // DRAW BORDERS AROUND WALLS (OPTIONAL, CAN BE TURNED OFF WITHOUT ANY SIDE EFFECTS)
+            this.ctx.save();
+            this.ctx.shadowColor   = "rgba(150, 150, 150, 1)";
+            this.ctx.shadowOffsetX = 3;
+            this.ctx.shadowOffsetY = 3;
+            this.ctx.shadowBlur    = 3;
+
+            let wall_segments = [];
+            let prev_char     = "";
+            let start_x       = 0;
+            let text1         = text + " ";
+            for (let i = 0; i < text1.length; ++i) {
+                if (text1[i] == this.WALL_CHAR && prev_char != this.WALL_CHAR)
+                    start_x = i;
+                else if (text1[i] != this.WALL_CHAR && prev_char == this.WALL_CHAR)
+                    wall_segments.push({x: start_x, len: i-start_x});
+                prev_char = text1[i];
+            }
+            let origLW           = this.ctx.lineWidth;
+            this.ctx.lineWidth   = 1;
+            let origStrokeStyle  = this.ctx.strokeStyle;
+            this.ctx.strokeStyle = "#FFFFFF";
+            for (let i = 0; i < wall_segments.length; ++i) {
+                let start_x  = wall_segments[i].x;
+                let seg_len  = wall_segments[i].len;
+                //console.log("x = ", start_x, " len = ", seg_len);
+                let draw_len = new Array(seg_len+1).join("/");
+                let fd = MeasureText(draw_len, true, this.FONT, this.FONT_SIZE);
+                if (seg_len > 2) {
+                    roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+2, fd[1]);
+                } else {
+                    if (start_x !== 0 && start_x != (this.image_cols-2)) {
+                        if (text[start_x-1] == this.HORI_SEP_CHAR) {
+                            if ((r-1) >= 0 && this.image[r-1][start_x] != this.WALL_CHAR)
+                                roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1]+2, 2);
+                            else if ((r+1) < this.image_rows && this.image[r+1][start_x] != this.WALL_CHAR)
+                                roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1]+2, 1);
+                            else {
+                                drawVerticalLine(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-1, fd[1]+2);
+                                drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]);
+                            }
+                        } else {
+                            drawVerticalLine(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-1, fd[1]+2);
+                            drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]);
+                        }
+                    } else if (start_x === 0 || start_x == (this.image_cols-2)) {
+                        if ((r-1) >= 0 && this.image[r-1][start_x] == " ")
+                            roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1]+2, 2);
+                        else if ((r+1) < this.image_rows && this.image[r+1][start_x] == " ")
+                            roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1]+2, 1);
+                        else {
+                            drawVerticalLine(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-1, fd[1]+2);
+                            drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]);
+                        }
+                    }
+                }
+            }
+            this.ctx.lineWidth   = origLW;
+            this.ctx.strokeStyle = origStrokeStyle;
+            this.ctx.restore();
+        }
+
+        if (path_chars_present) { // DRAW BORDERS AROUND THE PATH (OPTIONAL, TURNING IT OFF DEFAULTS TO VANILLA WAY OF DRAWING WITH PATH CHARACTER)
+            this.ctx.save();
+            // Convert path character to wall characters
+            let mod_path_chars = "";
+            for (let i = 0; i < path_chars.length; ++i) {
+                if (path_chars.charAt(i) != this.PATH_CHAR && path_chars.charAt(i-1) == this.PATH_CHAR)
+                    mod_path_chars += this.WALL_CHAR; // Column width is 2 "//" characters
+                else if (path_chars.charAt(i) == this.PATH_CHAR)
+                    mod_path_chars += this.WALL_CHAR;
+                else
+                    mod_path_chars += path_chars.charAt(i);
+            }
+            this.ctx.fillStyle = "rgba(0, 255, 0, 1)";
+            this.ctx.fillText(mod_path_chars, x, y);
+
+            let path_segments = [];
+            let prev_char     = "";
+            let start_x       = 0;
+            let text1         = mod_path_chars + " ";
+            for (let i = 0; i < text1.length; ++i) {
+                if (text1[i] == this.WALL_CHAR && prev_char != this.WALL_CHAR)
+                    start_x = i;
+                else if (text1[i] != this.WALL_CHAR && prev_char == this.WALL_CHAR)
+                    path_segments.push({x: start_x, len: i-start_x});
+                prev_char = text1[i];
+            }
+            let origLW           = this.ctx.lineWidth;
+            this.ctx.lineWidth   = 2;
+            let origStrokeStyle  = this.ctx.strokeStyle;
+            this.ctx.strokeStyle = "#00FF00";
+            for (let i = 0; i < path_segments.length; ++i) {
+                let start_x  = path_segments[i].x;
+                let seg_len  = path_segments[i].len;
+                //console.log("x = ", start_x, " len = ", seg_len);
+                let draw_len = new Array(seg_len+1).join("/");
+                let fd = MeasureText(draw_len, true, this.FONT, this.FONT_SIZE);
+                if (seg_len > 2) {
+                    roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1]);
+                } else {
+                    if (r-1 >= 0 && this.image[r-1][start_x] == " ")
+                        roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1], 2);
+                    else if (r+1 < this.image_rows && this.image[r+1][start_x] == " ")
+                        roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1], 1);
+                    else {
+                        drawVerticalLine(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-1, fd[1]+2);
+                        drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]);
+                    }
+                }
+            }
+            this.ctx.lineWidth   = origLW;
+            this.ctx.strokeStyle = origStrokeStyle;
+            this.ctx.restore();
+        } else { // VANILLA PATH DRAWING
+            this.ctx.fillStyle = "rgba(0, 255, 0, 1)";
+            this.ctx.fillText(path_chars, x, y);
+        }
+
+        if (lock_chars_present) { // DRAW BORDERS AROUND THE LOCKED PATH (OPTIONAL, TURNING IT OFF DEFAULTS TO VANILLA WAY OF DRAWING WITH LOCKED-PATH CHARACTER)
+            this.ctx.save();
+            this.ctx.shadowColor   = "black";
+            this.ctx.shadowOffsetX = 3;
+            this.ctx.shadowOffsetY = 3;
+            this.ctx.shadowBlur    = 5;
+            // Convert path character to wall characters
+            let mod_lock_chars = "";
+            for (let i = 0; i < lock_chars.length; ++i) {
+                if (lock_chars.charAt(i) != this.LOCKED_P_CHAR && lock_chars.charAt(i-1) == this.LOCKED_P_CHAR)
+                    mod_lock_chars += this.WALL_CHAR; // Column width is 2 "//" characters
+                else if (lock_chars.charAt(i) == this.LOCKED_P_CHAR)
+                    mod_lock_chars += this.WALL_CHAR;
+                else
+                    mod_lock_chars += lock_chars.charAt(i);
+            }
+            this.ctx.fillStyle = "rgba(100,149,237, 1)";
+            this.ctx.fillText(mod_lock_chars, x, y);
+
+            let path_segments = [];
+            let prev_char     = "";
+            let start_x       = 0;
+            let text1         = mod_lock_chars + " ";
+            for (let i = 0; i < text1.length; ++i) {
+                if (text1[i] == this.WALL_CHAR && prev_char != this.WALL_CHAR)
+                    start_x = i;
+                else if (text1[i] != this.WALL_CHAR && prev_char == this.WALL_CHAR)
+                    path_segments.push({x: start_x, len: i-start_x});
+                prev_char = text1[i];
+            }
+            let origLW           = this.ctx.lineWidth;
+            this.ctx.lineWidth   = 2;
+            let origStrokeStyle  = this.ctx.strokeStyle;
+            this.ctx.strokeStyle = "#6495ED";
+            for (let i = 0; i < path_segments.length; ++i) {
+                let start_x  = path_segments[i].x;
+                let seg_len  = path_segments[i].len;
+                //console.log("x = ", start_x, " len = ", seg_len);
+                let draw_len = new Array(seg_len+1).join("/");
+                let fd = MeasureText(draw_len, true, this.FONT, this.FONT_SIZE);
+                if (seg_len > 2) {
+                    roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1]);
+                } else {
+                    if (r-1 >= 0 && this.image[r-1][start_x] == " ")
+                        roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1], 2);
+                    else if (r+1 < this.image_rows && this.image[r+1][start_x] == " ")
+                        roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1], 1);
+                    else {
+                        drawVerticalLine(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-1, fd[1]+2);
+                        drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]);
+                    }
+                }
+            }
+            this.ctx.lineWidth   = origLW;
+            this.ctx.strokeStyle = origStrokeStyle;
+            this.ctx.restore();
+        } else {
+            this.ctx.fillStyle  = "rgba(220, 220, 220, 1)";
+            this.ctx.fillText(lock_chars, x, y);
+        }
     };
 
     this.Redraw = function(row_data, col_data) {
