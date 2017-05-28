@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome-4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
     <link rel="stylesheet" type="text/css" href="../css/sweetalert.css">
     <link rel="stylesheet" type="text/css" href="../css/game.css">
@@ -12,13 +13,15 @@
     <canvas id="myCanvas" class="myCanvas"></canvas>
 </div>
 <div class="center-align-container" style="font-size:1.4em;margin-top:0;padding-top:0">
-    <a href="../menu.html" style="color:white">Levels</a>
-    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-    <a id="LOCK_BTN" style="color:white;cursor:default">Toggle-Lock</a>
-    <span>&nbsp;&nbsp;&nbsp;</span>
-    <a id="UNDO_BTN" style="color:white;cursor:default">Undo</a>
-    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-    <a onclick="ReloadPage()" style="color:#DB7093;cursor:default">Restart</a>
+    <a href="../menu.html" style="color:rgba(150, 146, 130, 0.7)"><i class="fa fa-bars fa-3x" aria-hidden="true"></i></a>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <a id="LOCK_BTN" style="color:rgba(150, 146, 130, 0.7);cursor:pointer"><i class="fa fa-lock fa-3x" aria-hidden="true"></i></a>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <a id="UNDO_BTN" style="color:rgba(150, 146, 130, 0.7);cursor:pointer"><i class="fa fa-times fa-3x" aria-hidden="true"></i></a>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <a id="BOOKMARK_BTN" style="color:rgba(150, 146, 130, 0.7);cursor:pointer"><i class="fa fa-bookmark-o fa-3x" aria-hidden="true"></i></a>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <a onclick="ReloadPage()" style="color:#DB7093;cursor:pointer"><i class="fa fa-repeat fa-3x" aria-hidden="true"></i></a>
 </div>
 
 <script src="../js/jquery-3.2.1.min.js"></script>
@@ -51,7 +54,8 @@ $(document).ready(function() {
     }
 
     var _b = new board(R, C, "myCanvas", FONT, fh-1);
-    _b.Draw(row_data, col_data);
+    _b.RestoreBookmark(row_data, col_data);
+
     function getMousePos(canvas, evt) {
         let rect = canvas.getBoundingClientRect();
         return {
@@ -140,6 +144,10 @@ $(document).ready(function() {
 
     $("#UNDO_BTN").click(function() {
         _b.RestoreLockedState();
+    });
+
+    $("#BOOKMARK_BTN").click(function() {
+        _b.Bookmark();
     });
 });
 </script>

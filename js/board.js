@@ -53,17 +53,19 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
     for (let r = 0; r < this.image_rows; r++)
         this.image[r] = new Array(this.image_cols);
 
-
-    this.res = new Array(this.R);
+    // Victory check related
+    this.degree = new Array(this.R);
     for (let i = 0; i < this.R; ++i)
-        this.res[i] = new Array(this.C);
+        this.degree[i] = new Array(this.C);
     for (let i = 0; i < this.R; ++i)
         for (let j = 0; j < this.C; ++j)
-            this.res[i][j] = 0;
+            this.degree[i][j] = 0;
     this.adj_list = new Array(this.R * this.C);
     this.colormap = new Array(this.R * this.C);
 
-    this.lvl      = "t1";
+    let pageurl = window.location.pathname;
+    this.lvl    = pageurl.split("/").pop().split(".")[0];
+
     this.ClickLog = [];
 
     // Drawing related stuff
@@ -192,13 +194,13 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
             let rect_x = this.X_OFFSET + ctx_char_width - ctx_char_width / 2;
             for (let j = 0; j < this.C; ++j) {
                 if ((i + j) % 2) {
-                    if (this.res[i][j] == 2)
+                    if (this.degree[i][j] == 2)
                         this.ctx.fillStyle="rgba(94, 93, 155, 0.35)";
                     else
                         this.ctx.fillStyle="rgba(104, 103, 97, 0.3)";
                 }
                 else {
-                    if (this.res[i][j] == 2)
+                    if (this.degree[i][j] == 2)
                         this.ctx.fillStyle="rgba(130, 126, 155, 0.45)";
                     else
                         this.ctx.fillStyle="rgba(150, 146, 130, 0.4)";
@@ -550,9 +552,9 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
 
     this.Click = function(x, y, redraw) {
         if (x < 0) {
-            // NOTE - cv() must be called before Redraw(), it populates this.res used
+            // NOTE - CheckWin() must be called before Redraw(), it populates this.degree used
             // by Redraw() to color the completed squares differently.
-            if (this.cv()) {
+            if (this.CheckWin()) {
                 this.ToggleLock();
                 let next_lvl_link = this.GetNextLevelLink();
                 swal ({
@@ -604,13 +606,13 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
             if (this.orig_row_data[r][c] == OPEN && this.curr_row_data[r][c] == PATH)
                 this.curr_row_data[r][c] = OPEN;
             else if (this.orig_row_data[r][c] == OPEN && this.curr_row_data[r][c] == OPEN) {
-                if (this.res[r-1][c] < 2 && this.res[r][c] < 2)
+                if (this.degree[r-1][c] < 2 && this.degree[r][c] < 2)
                     this.curr_row_data[r][c] = PATH;
             }
             else if (this.orig_row_data[r][c] == GATE && this.curr_row_data[r][c] == EXIT)
                 this.curr_row_data[r][c] = GATE;
             else if (this.orig_row_data[r][c] == GATE && this.curr_row_data[r][c] == GATE) {
-                if ((r === 0 && this.res[r][c] < 2) || (r == this.R && this.res[r-1][c] < 2))
+                if ((r === 0 && this.degree[r][c] < 2) || (r == this.R && this.degree[r-1][c] < 2))
                     this.curr_row_data[r][c] = EXIT;
             }
         } else { // player clicked on a column
@@ -619,20 +621,20 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
             if (this.orig_col_data[r][c] == OPEN && this.curr_col_data[r][c] == PATH)
                 this.curr_col_data[r][c] = OPEN;
             else if (this.orig_col_data[r][c] == OPEN && this.curr_col_data[r][c] == OPEN) {
-                if (this.res[r][c-1] < 2 && this.res[r][c] < 2)
+                if (this.degree[r][c-1] < 2 && this.degree[r][c] < 2)
                     this.curr_col_data[r][c] = PATH;
             }
             else if (this.orig_col_data[r][c] == GATE && this.curr_col_data[r][c] == EXIT)
                 this.curr_col_data[r][c] = GATE;
             else if (this.orig_col_data[r][c] == GATE && this.curr_col_data[r][c] == GATE) {
-                if ((c === 0 && this.res[r][c] < 2) || (c == this.C && this.res[r][c-1] < 2))
+                if ((c === 0 && this.degree[r][c] < 2) || (c == this.C && this.degree[r][c-1] < 2))
                     this.curr_col_data[r][c] = EXIT;
             }
         }
 
-        // NOTE - cv() must be called before Redraw(), it populates this.res used
+        // NOTE - CheckWin() must be called before Redraw(), it populates this.degree used
         // by Redraw() to color the completed squares differently.
-        if (redraw && this.cv()) {
+        if (redraw && this.CheckWin()) {
             this.ToggleLock();
                 let next_lvl_link = this.GetNextLevelLink();
                 swal ({
@@ -644,13 +646,13 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
         if (redraw)
             this.Redraw(this.curr_row_data, this.curr_col_data);
         if (!redraw)
-            this.UpdateRes(); // this.res is also updated inside cv()
+            this.UpdateDegrees(); // this.degree is also updated inside CheckWin()
     };
 
-    this.UpdateRes = function() {
+    this.UpdateDegrees = function() {
         for (let i = 0; i < this.R; ++i)
             for (let j = 0; j < this.C; ++j)
-                this.res[i][j] = 0;
+                this.degree[i][j] = 0;
         for (let i = 0; i < this.R+1; ++i) {
             for (let j = 0; j < this.C; ++j) {
                 let p = 0;
@@ -659,9 +661,9 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                     p = 1;
                 if (p) {
                     if (i > 0)
-                        ++this.res[i-1][j];
+                        ++this.degree[i-1][j];
                     if (i < this.R)
-                        ++this.res[i][j];
+                        ++this.degree[i][j];
                 }
             }
         }
@@ -673,18 +675,18 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                     p = 1;
                 if (p) {
                     if (j > 0)
-                        ++this.res[i][j-1];
+                        ++this.degree[i][j-1];
                     if (j < this.C)
-                        ++this.res[i][j];
+                        ++this.degree[i][j];
                 }
             }
         }
     };
 
-    this.cv = function() {
+    this.CheckWin = function() {
         for (let i = 0; i < this.R; ++i)
             for (let j = 0; j < this.C; ++j)
-                this.res[i][j] = 0;
+                this.degree[i][j] = 0;
 
         for (let i = 0; i < this.R*this.C; ++i)
             this.adj_list[i] = [];
@@ -702,9 +704,9 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                 }
                 if (p) {
                     if (i > 0)
-                        ++this.res[i-1][j];
+                        ++this.degree[i-1][j];
                     if (i < this.R)
-                        ++this.res[i][j];
+                        ++this.degree[i][j];
                     if (i > 0 && i < this.R) {
                         let n1 = this.C*i + j;
                         let n2 = this.C*(i-1) + j;
@@ -727,9 +729,9 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                 }
                 if (p) {
                     if (j > 0)
-                        ++this.res[i][j-1];
+                        ++this.degree[i][j-1];
                     if (j < this.C)
-                        ++this.res[i][j];
+                        ++this.degree[i][j];
                     if (j > 0 && j < this.C) {
                         let n1 = this.C*i + j;
                         let n2 = this.C*i + j-1;
@@ -746,7 +748,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
         } else {
             for (let i = 0; i < this.R; ++i)
                 for (let j = 0; j < this.C; ++j)
-                    if (this.res[i][j] != 2) // cross every square exactly once
+                    if (this.degree[i][j] != 2) // cross every square exactly once
                         return false;
             //for (let i = 0; i < this.R * this.C; ++i)
             //    console.log(this.adj_list[i]);
@@ -767,9 +769,8 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                 return false; // SHOULD NOT HIT THIS AT ALL
         }
 
-        let path = window.location.pathname;
-        this.lvl = path.split("/").pop().split(".")[0];
         Cookies.set("#" + this.lvl, "1", {expires: 1000});
+        Cookies.remove("#" + this.lvl + "-bm");
         return true;
     };
 
@@ -867,7 +868,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                 }
             }
         }
-        this.UpdateRes();
+        this.UpdateDegrees();
         this.Redraw(this.curr_row_data, this.curr_col_data);
     };
 
@@ -889,7 +890,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                     this.curr_col_data[i][j] = GATE;
             }
         }
-        this.UpdateRes();
+        this.UpdateDegrees();
         this.Redraw(this.curr_row_data, this.curr_col_data);
     };
 
@@ -911,6 +912,27 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
             next_lvl_link = this.lvl[0] + n.toString();
         }
         return "<h1><a href='" + next_lvl_link + ".html'>Next Level</a></h1>";
+    };
+
+    this.RestoreBookmark = function (orig_row_data, orig_col_data) {
+        this.Draw(orig_row_data, orig_col_data, true); // Updates this.orig_row_data and this.orig_col_data
+        let id = "#" + this.lvl + "-bm";
+        let raw_data = Cookies.get(id);
+        if (typeof raw_data !== "undefined") {
+            let data = JSON.parse(raw_data);
+            this.curr_row_data = data.rd;
+            this.curr_col_data = data.cd;
+            this.UpdateDegrees();
+            this.Redraw(this.curr_row_data, this.curr_col_data);
+            return true;
+        }
+        return false;
+    };
+
+    this.Bookmark = function () {
+        let id = "#" + this.lvl + "-bm";
+        Cookies.remove(id);
+        Cookies.set(id, {rd: this.curr_row_data, cd: this.curr_col_data}, {expires: 1000});
     };
 };
 
