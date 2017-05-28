@@ -187,9 +187,9 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
         let ctx_char_width    = this.ctx.measureText("X").width;
         let rect_width        = ctx_11_char_width; //this.cell_x * this.font_dim[0];
         let rect_height       = this.cell_y * this.font_dim[1];
-        let rect_y            = this.Y_OFFSET + this.font_dim[1];
+        let rect_y            = this.Y_OFFSET + this.font_dim[1] - this.font_dim[1]/2;
         for (let i = 0; i < this.R; ++i) {
-            let rect_x = this.X_OFFSET + ctx_char_width /*this.font_dim[0]*/;
+            let rect_x = this.X_OFFSET + ctx_char_width - ctx_char_width / 2;
             for (let j = 0; j < this.C; ++j) {
                 if ((i + j) % 2) {
                     if (this.res[i][j] == 2)
@@ -203,7 +203,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                     else
                         this.ctx.fillStyle="rgba(150, 146, 130, 0.4)";
                 }
-                this.ctx.fillRect(rect_x, rect_y, rect_width, rect_height);
+                this.ctx.fillRect(rect_x, rect_y, rect_width + ctx_char_width, rect_height + this.font_dim[1]);
                 rect_x += (rect_width + ctx_char_width /*this.font_dim[0]*/);
             }
             rect_y += (rect_height + this.font_dim[1]);
@@ -284,7 +284,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
             }
         }
         let x = this.X_OFFSET;
-        this.ctx.fillStyle  = "rgba(150, 150, 150, 0.5)";
+        this.ctx.fillStyle  = "rgba(130, 130, 130, 1)";
         this.ctx.fillText(dots_chars, x, y);
         this.ctx.fillStyle  = "rgba(220, 220, 220, 1)";
         this.ctx.fillText(wall_chars, x, y);
