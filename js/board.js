@@ -5,6 +5,7 @@ var PATH = 3;
 var EXIT = 4;
 var FROZEN_PATH = 5;
 var FROZEN_EXIT = 6;
+var HELPER_WALL = 7;
 
 var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
     this.R             = R;  // #of rows
@@ -23,6 +24,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
     this.LOCKED_P_CHAR = "X";
     this.VERT_SEP_CHAR = ".";
     this.HORI_SEP_CHAR = ".";
+    this.HELPER_W_CHAR = "\\";
     this.CHROME_HACK_X = this.X_OFFSET;
     this.CHROME_HACK_Y = 0; //this.Y_OFFSET;
 
@@ -99,7 +101,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                        this.image[start_row][a] = this.WALL_CHAR;
                 } else if (edge_type === OPEN) {
                     for (let a = start_col; a < start_col + this.cell_x + 2; ++a)
-                        if (this.image[start_row][a] != this.WALL_CHAR) // if columns are drawn before rows
+                        if (this.image[start_row][a] != this.WALL_CHAR && this.image[start_row][a] != this.HELPER_W_CHAR) // if columns are drawn before rows
                             this.image[start_row][a] = this.HORI_SEP_CHAR;
                 } else if (edge_type === GATE) {
                     for (let a = start_col; a < start_col + this.cell_x + 2; ++a) {
@@ -121,6 +123,10 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                     for (let b = start_row-3; b <= start_row+3; ++b)
                         if (b >= 0 && b < this.image_rows)
                             this.image[b][start_col+6] = disp_ch;
+                } else if (edge_type == HELPER_WALL) {
+                    for (let a = start_col; a < start_col + this.cell_x + 2; ++a)
+                        if (this.image[start_row][a] != this.WALL_CHAR) // if columns are drawn before rows
+                            this.image[start_row][a] = this.HELPER_W_CHAR;
                 }
             }
         }
@@ -138,7 +144,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                     }
                 } else if (edge_type === OPEN) {
                     for (let a = start_row; a < start_row + this.cell_y + 2; ++a)
-                        if (this.image[a][start_col] != this.WALL_CHAR) // since rows are drawn before columns
+                        if (this.image[a][start_col] != this.WALL_CHAR && this.image[a][start_col] != this.HELPER_W_CHAR) // since rows are drawn before columns
                             this.image[a][start_col] = this.VERT_SEP_CHAR;
                 } else if (edge_type === GATE) {
                     for (let a = start_row; a < start_row + this.cell_y + 2; ++a) {
@@ -177,6 +183,13 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                                 this.image[start_row+3][b] = " ";
                             alternate = 1 - alternate;
                         }
+                    }
+                } else if (edge_type == HELPER_WALL) {
+                    for (let a = start_row; a < start_row + this.cell_y + 2; ++a) {
+                        if (this.image[a][start_col] != this.WALL_CHAR) // since rows are drawn before columns
+                            this.image[a][start_col] = this.HELPER_W_CHAR;
+                        //if (this.image[a][start_col+1] != this.WALL_CHAR) // 2-char width NOT needed when fancy bordering around the helper wall is on
+                        //    this.image[a][start_col+1] = this.HELPER_W_CHAR;
                     }
                 }
             }
@@ -247,23 +260,28 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
         let path_chars = "";
         let dots_chars = "";
         let lock_chars = "";
+        let help_chars = "";
 
-        let wall_chars_present = 0;
-        let path_chars_present = 0;
-        let lock_chars_present = 0;
+        let wall_chars_fencing = 0;
+        let path_chars_fencing = 0;
+        let lock_chars_fencing = 0;
+        let help_chars_fencing = 0;
+        //console.log(text);
         for (let i = 0; i < text.length; ++i) {
             if (text[i] == this.LOCKED_P_CHAR) {
-                lock_chars += this.LOCKED_P_CHAR;
-                lock_chars_present = 1;
                 wall_chars += " ";
                 path_chars += " ";
                 dots_chars += " ";
+                lock_chars += this.LOCKED_P_CHAR;
+                lock_chars_fencing = 1;
+                help_chars += " ";
             } else if (text[i] == this.WALL_CHAR) {
                 wall_chars += this.WALL_CHAR;
-                wall_chars_present = 1;
+                wall_chars_fencing = 1;
                 path_chars += " ";
                 dots_chars += " ";
                 lock_chars += " ";
+                help_chars += " ";
             } else if (text[i] == this.HORI_SEP_CHAR || text[i] == this.VERT_SEP_CHAR) {
                 wall_chars += " ";
                 path_chars += " ";
@@ -272,17 +290,27 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                 else
                     dots_chars += " ";
                 lock_chars += " ";
+                help_chars += " ";
             } else if (text[i] == this.PATH_CHAR) {
                 wall_chars += " ";
                 path_chars += this.PATH_CHAR;
-                path_chars_present = 1;
+                path_chars_fencing = 1;
                 dots_chars += " ";
                 lock_chars += " ";
+                help_chars += " ";
+            } else if (text[i] == this.HELPER_W_CHAR) {
+                wall_chars += " ";
+                path_chars += " ";
+                dots_chars += " ";
+                lock_chars += " ";
+                help_chars += this.HELPER_W_CHAR;
+                help_chars_fencing = 1;
             } else {
                 wall_chars += text[i];
                 path_chars += text[i];
                 dots_chars += text[i];
                 lock_chars += text[i];
+                help_chars += text[i];
             }
         }
         let x = this.X_OFFSET;
@@ -291,7 +319,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
         this.ctx.fillStyle  = "rgba(220, 220, 220, 1)";
         this.ctx.fillText(wall_chars, x, y);
 
-        if (wall_chars_present) { // DRAW BORDERS AROUND WALLS (OPTIONAL, CAN BE TURNED OFF WITHOUT ANY SIDE EFFECTS)
+        if (wall_chars_fencing) { // DRAW BORDERS AROUND WALLS (OPTIONAL, CAN BE TURNED OFF WITHOUT ANY SIDE EFFECTS)
             this.ctx.save();
             this.ctx.shadowColor   = "rgba(150, 150, 150, 1)";
             this.ctx.shadowOffsetX = 3;
@@ -323,18 +351,18 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                     roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+2, fd[1]);
                 } else {
                     if (start_x !== 0 && start_x != (this.image_cols-2)) {
-                        if (text[start_x-1] == this.HORI_SEP_CHAR) {
+                        if (text[start_x-1] == this.HORI_SEP_CHAR || text[start_x-1] == this.HELPER_W_CHAR) {
                             if ((r-1) >= 0 && this.image[r-1][start_x] != this.WALL_CHAR)
                                 roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1]+2, 2);
                             else if ((r+1) < this.image_rows && this.image[r+1][start_x] != this.WALL_CHAR)
                                 roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1]+2, 1);
                             else {
                                 drawVerticalLine(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-1, fd[1]+2);
-                                drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]);
+                                drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]+2);
                             }
                         } else {
                             drawVerticalLine(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-1, fd[1]+2);
-                            drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]);
+                            drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]+2);
                         }
                     } else if (start_x === 0 || start_x == (this.image_cols-2)) {
                         if ((r-1) >= 0 && this.image[r-1][start_x] == " ")
@@ -343,7 +371,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                             roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1]+2, 1);
                         else {
                             drawVerticalLine(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-1, fd[1]+2);
-                            drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]);
+                            drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]+2);
                         }
                     }
                 }
@@ -353,12 +381,12 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
             this.ctx.restore();
         }
 
-        if (path_chars_present) { // DRAW BORDERS AROUND THE PATH (OPTIONAL, TURNING IT OFF DEFAULTS TO VANILLA WAY OF DRAWING WITH PATH CHARACTER)
+        if (path_chars_fencing) { // DRAW BORDERS AROUND THE PATH (OPTIONAL, TURNING IT OFF DEFAULTS TO VANILLA WAY OF DRAWING WITH PATH CHARACTER)
             this.ctx.save();
             // Convert path character to wall characters
             let mod_path_chars = "";
             for (let i = 0; i < path_chars.length; ++i) {
-                if (path_chars.charAt(i) != this.PATH_CHAR && path_chars.charAt(i-1) == this.PATH_CHAR)
+                if (i > 0 && path_chars.charAt(i) != this.PATH_CHAR && path_chars.charAt(i-1) == this.PATH_CHAR)
                     mod_path_chars += this.WALL_CHAR; // Column width is 2 "//" characters
                 else if (path_chars.charAt(i) == this.PATH_CHAR)
                     mod_path_chars += this.WALL_CHAR;
@@ -398,7 +426,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                         roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1], 1);
                     else {
                         drawVerticalLine(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-1, fd[1]+2);
-                        drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]);
+                        drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]+2);
                     }
                 }
             }
@@ -410,7 +438,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
             this.ctx.fillText(path_chars, x, y);
         }
 
-        if (lock_chars_present) { // DRAW BORDERS AROUND THE LOCKED PATH (OPTIONAL, TURNING IT OFF DEFAULTS TO VANILLA WAY OF DRAWING WITH LOCKED-PATH CHARACTER)
+        if (lock_chars_fencing) { // DRAW BORDERS AROUND THE LOCKED PATH (OPTIONAL, TURNING IT OFF DEFAULTS TO VANILLA WAY OF DRAWING WITH LOCKED-PATH CHARACTER)
             this.ctx.save();
             this.ctx.shadowColor   = "black";
             this.ctx.shadowOffsetX = 3;
@@ -419,7 +447,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
             // Convert path character to wall characters
             let mod_lock_chars = "";
             for (let i = 0; i < lock_chars.length; ++i) {
-                if (lock_chars.charAt(i) != this.LOCKED_P_CHAR && lock_chars.charAt(i-1) == this.LOCKED_P_CHAR)
+                if (i > 0 && lock_chars.charAt(i) != this.LOCKED_P_CHAR && lock_chars.charAt(i-1) == this.LOCKED_P_CHAR)
                     mod_lock_chars += this.WALL_CHAR; // Column width is 2 "//" characters
                 else if (lock_chars.charAt(i) == this.LOCKED_P_CHAR)
                     mod_lock_chars += this.WALL_CHAR;
@@ -459,7 +487,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                         roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1], 1);
                     else {
                         drawVerticalLine(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-1, fd[1]+2);
-                        drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]);
+                        drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]+2);
                     }
                 }
             }
@@ -469,6 +497,76 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
         } else {
             this.ctx.fillStyle  = "rgba(220, 220, 220, 1)";
             this.ctx.fillText(lock_chars, x, y);
+        }
+
+        if (help_chars_fencing) {
+            this.ctx.save();
+            let mod_help_chars = "";
+            for (let i = 0; i < help_chars.length; ++i) {
+                if (i > 1 && help_chars.charAt(i) != this.HELPER_W_CHAR && help_chars.charAt(i-1) == this.HELPER_W_CHAR && help_chars.charAt(i-2) != this.HELPER_W_CHAR)
+                    mod_help_chars += this.HELPER_W_CHAR; // Column width is 2 this.HELPER_W_CHAR characters
+                else if (i == 1 && help_chars.charAt(i) != this.HELPER_W_CHAR && help_chars.charAt(i-1) == this.HELPER_W_CHAR)
+                    mod_help_chars += this.HELPER_W_CHAR; // Column width is 2 this.HELPER_W_CHAR characters
+                else if (r > 0 && i > 0 && help_chars.charAt(i) != this.HELPER_W_CHAR &&
+                                           help_chars.charAt(i-1) == this.HELPER_W_CHAR &&
+                                           this.image[r-1][i-1] == this.HELPER_W_CHAR)
+                    mod_help_chars += this.HELPER_W_CHAR;  // Extending row by 1 character conditionally
+                else if (r+1 < this.image_rows && i > 0 && help_chars.charAt(i) != this.HELPER_W_CHAR &&
+                                                           help_chars.charAt(i-1) == this.HELPER_W_CHAR &&
+                                                           this.image[r+1][i-1] == this.HELPER_W_CHAR)
+                    mod_help_chars += this.HELPER_W_CHAR; // Extending row by 1 character conditionally
+                else
+                    mod_help_chars += help_chars.charAt(i);
+            }
+            this.ctx.fillStyle = "rgb(204, 204, 255)";
+            this.ctx.fillText(mod_help_chars, x, y);
+            
+            let path_segments = [];
+            let prev_char     = "";
+            let start_x       = 0;
+            let text1         = mod_help_chars + " ";
+            for (let i = 0; i < text1.length; ++i) {
+                if (text1[i] == this.HELPER_W_CHAR && prev_char != this.HELPER_W_CHAR)
+                    start_x = i;
+                else if (text1[i] != this.HELPER_W_CHAR && prev_char == this.HELPER_W_CHAR)
+                    path_segments.push({x: start_x, len: i-start_x});
+                prev_char = text1[i];
+            }
+            let origLW           = this.ctx.lineWidth;
+            this.ctx.lineWidth   = 2;
+            let origStrokeStyle  = this.ctx.strokeStyle;
+            this.ctx.strokeStyle = "#E6E6FF";
+            for (let i = 0; i < path_segments.length; ++i) {
+                let start_x  = path_segments[i].x;
+                let seg_len  = path_segments[i].len;
+                //console.log("x = ", start_x, " len = ", seg_len);
+                let draw_len = new Array(seg_len+1).join("/");
+                let fd = MeasureText(draw_len, true, this.FONT, this.FONT_SIZE);
+                if (seg_len > 2) {
+                    roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1]);
+                } else {
+                    if (r-1 >= 0 && (this.image[r-1][start_x] == this.HORI_SEP_CHAR ||
+                                     this.image[r-1][start_x] == this.VERT_SEP_CHAR ||
+                                     this.image[r-1][start_x] == this.WALL_CHAR ||
+                                     this.image[r-1][start_x] == " "))
+                        roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1], 2);
+                    else if (r+1 < this.image_rows && (this.image[r+1][start_x] == this.HORI_SEP_CHAR ||
+                                                       this.image[r+1][start_x] == this.VERT_SEP_CHAR ||
+                                                       this.image[r+1][start_x] == this.WALL_CHAR ||
+                                                       this.image[r+1][start_x] == " "))
+                        roundRect(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-2, fd[0]+4, fd[1], 1);
+                    else {
+                        drawVerticalLine(this.ctx, start_x*this.ctx.measureText("X").width + this.X_OFFSET - 2, y-1, fd[1]+2);
+                        drawVerticalLine(this.ctx, (start_x+2)*this.ctx.measureText("X").width + this.X_OFFSET+2, y-1, fd[1]+2);
+                    }
+                }
+            }
+            this.ctx.lineWidth   = origLW;
+            this.ctx.strokeStyle = origStrokeStyle;
+            this.ctx.restore();
+        } else {
+            this.ctx.fillStyle = "rgba(220, 220, 220, 1)";
+            this.ctx.fillText(help_chars, x, y);
         }
     };
 
@@ -550,7 +648,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
         this.ClickLog = [];
     };
 
-    this.Click = function(x, y, redraw) {
+    this.Click = function(x, y, redraw, helper_wall = 0) {
         if (x < 0) {
             // NOTE - CheckWin() must be called before Redraw(), it populates this.degree used
             // by Redraw() to color the completed squares differently.
@@ -599,54 +697,74 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
         //console.log("closest to a column? " + closest_to_col);
         //console.log("{r, c} = ", min_dist_loc);
         //console.log("min_dist = ", min_dist);
-
-        if (!closest_to_col) { // player clicked on a row
-            let r = min_dist_loc.r;
-            let c = min_dist_loc.c;
-            if (this.orig_row_data[r][c] == OPEN && this.curr_row_data[r][c] == PATH)
-                this.curr_row_data[r][c] = OPEN;
-            else if (this.orig_row_data[r][c] == OPEN && this.curr_row_data[r][c] == OPEN) {
-                if (this.degree[r-1][c] < 2 && this.degree[r][c] < 2)
-                    this.curr_row_data[r][c] = PATH;
+        if (helper_wall == 1) {
+            if (!closest_to_col) { // player clicked on a row
+                let r = min_dist_loc.r;
+                let c = min_dist_loc.c;
+                if (this.curr_row_data[r][c] == OPEN || this.curr_row_data[r][c] == GATE) {
+                    this.curr_row_data[r][c] = HELPER_WALL;
+                } else if (this.curr_row_data[r][c] == HELPER_WALL) {
+                    this.curr_row_data[r][c] = this.orig_row_data[r][c];
+                }
+            } else {
+                let r = min_dist_loc.r;
+                let c = min_dist_loc.c;
+                if (this.curr_col_data[r][c] == OPEN || this.curr_col_data[r][c] == GATE) {
+                    this.curr_col_data[r][c] = HELPER_WALL;
+                } else if (this.curr_col_data[r][c] == HELPER_WALL) {
+                    this.curr_col_data[r][c] = this.orig_col_data[r][c];
+                }
             }
-            else if (this.orig_row_data[r][c] == GATE && this.curr_row_data[r][c] == EXIT)
-                this.curr_row_data[r][c] = GATE;
-            else if (this.orig_row_data[r][c] == GATE && this.curr_row_data[r][c] == GATE) {
-                if ((r === 0 && this.degree[r][c] < 2) || (r == this.R && this.degree[r-1][c] < 2))
-                    this.curr_row_data[r][c] = EXIT;
-            }
-        } else { // player clicked on a column
-            let r = min_dist_loc.r;
-            let c = min_dist_loc.c;
-            if (this.orig_col_data[r][c] == OPEN && this.curr_col_data[r][c] == PATH)
-                this.curr_col_data[r][c] = OPEN;
-            else if (this.orig_col_data[r][c] == OPEN && this.curr_col_data[r][c] == OPEN) {
-                if (this.degree[r][c-1] < 2 && this.degree[r][c] < 2)
-                    this.curr_col_data[r][c] = PATH;
-            }
-            else if (this.orig_col_data[r][c] == GATE && this.curr_col_data[r][c] == EXIT)
-                this.curr_col_data[r][c] = GATE;
-            else if (this.orig_col_data[r][c] == GATE && this.curr_col_data[r][c] == GATE) {
-                if ((c === 0 && this.degree[r][c] < 2) || (c == this.C && this.degree[r][c-1] < 2))
-                    this.curr_col_data[r][c] = EXIT;
-            }
-        }
-
-        // NOTE - CheckWin() must be called before Redraw(), it populates this.degree used
-        // by Redraw() to color the completed squares differently.
-        if (redraw && this.CheckWin()) {
-            this.ToggleLock();
-                let next_lvl_link = this.GetNextLevelLink();
-                swal ({
-                    title: "Correct!",
-                    text: next_lvl_link,
-                    html: true
-                });
-        }
-        if (redraw)
             this.Redraw(this.curr_row_data, this.curr_col_data);
-        if (!redraw)
-            this.UpdateDegrees(); // this.degree is also updated inside CheckWin()
+        } else {
+            if (!closest_to_col) { // player clicked on a row
+                let r = min_dist_loc.r;
+                let c = min_dist_loc.c;
+                if (this.orig_row_data[r][c] == OPEN && this.curr_row_data[r][c] == PATH)
+                    this.curr_row_data[r][c] = OPEN;
+                else if (this.orig_row_data[r][c] == OPEN && this.curr_row_data[r][c] == OPEN) {
+                    if (this.degree[r-1][c] < 2 && this.degree[r][c] < 2)
+                        this.curr_row_data[r][c] = PATH;
+                }
+                else if (this.orig_row_data[r][c] == GATE && this.curr_row_data[r][c] == EXIT)
+                    this.curr_row_data[r][c] = GATE;
+                else if (this.orig_row_data[r][c] == GATE && this.curr_row_data[r][c] == GATE) {
+                    if ((r === 0 && this.degree[r][c] < 2) || (r == this.R && this.degree[r-1][c] < 2))
+                        this.curr_row_data[r][c] = EXIT;
+                }
+            } else { // player clicked on a column
+                let r = min_dist_loc.r;
+                let c = min_dist_loc.c;
+                if (this.orig_col_data[r][c] == OPEN && this.curr_col_data[r][c] == PATH)
+                    this.curr_col_data[r][c] = OPEN;
+                else if (this.orig_col_data[r][c] == OPEN && this.curr_col_data[r][c] == OPEN) {
+                    if (this.degree[r][c-1] < 2 && this.degree[r][c] < 2)
+                        this.curr_col_data[r][c] = PATH;
+                }
+                else if (this.orig_col_data[r][c] == GATE && this.curr_col_data[r][c] == EXIT)
+                    this.curr_col_data[r][c] = GATE;
+                else if (this.orig_col_data[r][c] == GATE && this.curr_col_data[r][c] == GATE) {
+                    if ((c === 0 && this.degree[r][c] < 2) || (c == this.C && this.degree[r][c-1] < 2))
+                        this.curr_col_data[r][c] = EXIT;
+                }
+            }
+
+            // NOTE - CheckWin() must be called before Redraw(), it populates this.degree used
+            // by Redraw() to color the completed squares differently.
+            if (redraw && this.CheckWin()) {
+                this.ToggleLock();
+                    let next_lvl_link = this.GetNextLevelLink();
+                    swal ({
+                        title: "Correct!",
+                        text: next_lvl_link,
+                        html: true
+                    });
+            }
+            if (redraw)
+                this.Redraw(this.curr_row_data, this.curr_col_data);
+            if (!redraw)
+                this.UpdateDegrees(); // this.degree is also updated inside CheckWin()
+        }
     };
 
     this.UpdateDegrees = function() {
@@ -933,6 +1051,11 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
         let id = "#" + this.lvl + "-bm";
         Cookies.remove(id);
         Cookies.set(id, {rd: this.curr_row_data, cd: this.curr_col_data}, {expires: 1000});
+    };
+
+    this.AddHelperWall = function(x, y) {
+        this.ClickLog = [];
+        this.Click(x, y, true, 1);
     };
 };
 
