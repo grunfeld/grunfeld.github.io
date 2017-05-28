@@ -111,7 +111,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                 } else if (edge_type == PATH || edge_type == FROZEN_PATH) {
                     let disp_ch = (edge_type == PATH) ? this.PATH_CHAR : this.LOCKED_P_CHAR;
                     for (let a = start_col; a < start_col + this.cell_x + 2; ++a)
-                        if (this.image[start_row][a] != this.WALL_CHAR)
+                        if (this.image[start_row][a] != this.WALL_CHAR && this.image[start_row][a] != this.HELPER_W_CHAR)
                             this.image[start_row][a] = this.HORI_SEP_CHAR;
                     for (let b = start_row-3; b <= start_row+3; ++b)
                         this.image[b][start_col+6] = disp_ch;
@@ -156,7 +156,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
                 } else if (edge_type == PATH || edge_type == FROZEN_PATH) {
                     let disp_ch = (edge_type == PATH) ? this.PATH_CHAR : this.LOCKED_P_CHAR;
                     for (let a = start_row; a < start_row + this.cell_y + 2; ++a)
-                        if (this.image[a][start_col] != this.WALL_CHAR)
+                        if (this.image[a][start_col] != this.WALL_CHAR && this.image[a][start_col] != this.HELPER_W_CHAR)
                             this.image[a][start_col] = this.VERT_SEP_CHAR;
                     let alternate = 0;
                     for (let b = start_col-6; b <= start_col+6; ++b) {
