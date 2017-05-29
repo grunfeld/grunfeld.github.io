@@ -74,7 +74,7 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
     let sample_text       = new Array(10 + 1).join("X");
     this.font_dim         = MeasureText(sample_text, true, this.FONT, this.FONT_SIZE);
     let ctx_char_width    = this.font_dim[0] / sample_text.length;
-    this.ARENA_WIDTH      = this.C * this.cell_x * ctx_char_width + (this.C + 2) * ctx_char_width; // this.C + 2 because vertical walls are 2-chars long
+    this.ARENA_WIDTH      = this.C * this.cell_x * ctx_char_width + (this.C + 2) * ctx_char_width + ctx_char_width; // +ctx_char_width to account for 2-char wide last column
     this.ARENA_HEIGHT     = this.R * this.cell_y * this.font_dim[1] + (this.R + 1) * this.font_dim[1];
     this.canvas           = document.getElementById(this.CANVAS_NAME);
     this.canvas.width     = this.X_OFFSET + this.ARENA_WIDTH + ctx_char_width + this.CHROME_HACK_X;
@@ -575,8 +575,10 @@ var board = function(R, C, canvas_element_name, FONT, font_size = 12) {
     };
 
     this.CalculateSegmentMidpoints = function(board_width, board_height) {
-        let hori_segment_len = board_width / this.C;
-        let vert_segment_len = board_height / this.R;
+        let ctx_11_char_width = this.ctx.measureText("XXXXXXXXXXX").width;
+        let ctx_char_width    = this.ctx.measureText("X").width;
+        let hori_segment_len  = ctx_11_char_width + ctx_char_width; // Seems to be the only reliable way for the width calculations
+        let vert_segment_len  = this.font_dim[1] * (this.cell_y + 1);
 
         // Processing for the horizontal segments (rows)
         for (let i = 0; i < this.R+1; ++i) {
