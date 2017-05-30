@@ -22,6 +22,11 @@
         .table td a { color: lightblue; }
         .table tr th { font-size: 1.4em; }
         a { outline: 0; }
+
+        .mainlink:hover {
+            transform: scale(1.1);
+            transition-duration: .08s
+        }
     </style>
   </head>
 <body class="text-white" style="background-color:black">
@@ -39,9 +44,9 @@
             <table class="table table-sm table-borderless">
                 <tbody>
                     <tr>
-                        <td><a href="#HELP"><i class="fa fa-question-circle-o fa-5x" aria-hidden="true"></i></a></td>
-                        <td><a href="menu.html"><i class="fa fa-gamepad fa-5x" aria-hidden="true"></i></a></td>
-                        <td><a href="https://github.com/grunfeld/grunfeld.github.io"><i class="fa fa-github fa-5x" aria-hidden="true"></i></a></td>
+                        <td><a href="#HELP"><i class="mainlink fa fa-question-circle-o fa-5x" aria-hidden="true"></i></a></td>
+                        <td><a href="menu.html"><i class="mainlink fa fa-gamepad fa-5x" aria-hidden="true"></i></a></td>
+                        <td><a href="https://github.com/grunfeld/grunfeld.github.io"><i class="mainlink fa fa-github fa-5x" aria-hidden="true"></i></a></td>
                     </tr>
                 </tbody>
             </table>
